@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Geet Lekhak – Lyrics Studio</title>
+<style>
+:root{
+  --ink:#16142e; --ink2:#221f45; --paper:#fff4dc; --marigold:#f2a900; --rani:#d6336c; --muted:#a9a5d4;
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI","Noto Sans","Noto Sans Devanagari",system-ui,sans-serif;background:var(--ink);color:var(--paper);min-height:100vh;padding:0 0 90px}
+header{padding:28px 20px 18px;background:linear-gradient(160deg,var(--ink2),var(--ink));border-bottom:3px solid var(--marigold)}
+header h1{font-size:30px;font-weight:800;letter-spacing:.2px}
+header h1 span{color:var(--marigold)}
+header p{color:var(--muted);margin-top:6px;font-size:14px}
+main{max-width:760px;margin:0 auto;padding:18px 16px}
+.panel{background:var(--ink2);border:1px solid #38346b;border-radius:var(--r);padding:16px;margin-bottom:16px}
+.panel h2{font-size:15px;font-weight:700;color:var(--marigold);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+select,input[type=text],textarea{width:100%;background:var(--ink);color:var(--paper);border:1px solid #4a4585;border-radius:10px;padding:11px 12px;font:inherit;font-size:15px}
+select:focus,input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--marigold);outline-offset:1px}
+textarea{min-height:76px;resize:vertical}
+.full{grid-column:1/-1}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid #4a4585;background:var(--ink);color:var(--paper);padding:9px 14px;border-radius:999px;font-size:14px;cursor:pointer;font-family:inherit}
+.chip[aria-pressed=true]{background:var(--rani);border-color:var(--rani);font-weight:700}
+.chip.sm{padding:7px 12px;font-size:13px}
+.chip.on[aria-pressed=true]{background:var(--marigold);border-color:var(--marigold);color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--marigold)}
+.row{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
+.go{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--ink) 35%);display:flex;justify-content:center}
+.go button{width:100%;max-width:728px;border:0;border-radius:14px;padding:15px;background:var(--marigold);color:var(--ink);font:inherit;font-size:17px;font-weight:800;cursor:pointer}
+.go button:disabled{opacity:.6}
+#out{display:none}
+#lyrics{white-space:pre-wrap;line-height:1.85;font-size:17px;color:var(--paper);background:var(--ink);border-radius:12px;padding:16px;border-left:4px solid var(--rani)}
+.acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{border:1px solid var(--marigold);background:transparent;color:var(--marigold);padding:10px 14px;border-radius:10px;font:inherit;font-size:14px;cursor:pointer}
+.err{color:#ff9bb5;margin-top:8px;font-size:14px}
+.hist button{display:block;width:100%;text-align:left;background:var(--ink);color:var(--paper);border:1px solid #38346b;border-radius:10px;padding:10px 12px;margin-bottom:8px;font:inherit;font-size:14px;cursor:pointer}
+.hist small{color:var(--muted)}
+.dots span{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ink);margin:0 3px;animation:b 1s infinite}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes b{50%{transform:translateY(-6px)}}
+@media(prefers-reduced-motion:reduce){.dots span{animation:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Geet <span>Lekhak</span></h1>
+  <p>Write song lyrics in any style, genre, language and voice</p>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>Song topic</h2>
+    <label for="topic">What should the song be about?</label>
+    <textarea id="topic" placeholder="e.g. first meeting in the rain, missing Maa, friends forever..."></textarea>
+    <div class="chips" id="topicChips" style="margin-top:10px"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Singer's voice</h2>
+    <div class="chips" id="voice"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Style and language</h2>
+    <div class="grid">
+      <div><label for="genre">Genre</label><select id="genre"></select></div>
+      <div><label for="lang">Lyrics language</label><select id="lang"></select></div>
+      <div><label for="mood">Mood</label><select id="mood"></select></div>
+      <div><label for="era">Era / feel</label><select id="era"></select></div>
+      <div><label for="tempo">Tempo</label><select id="tempo"></select></div>
+      <div><label for="rhyme">Rhyme scheme</label><select id="rhyme"></select></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Song structure</h2>
+    <label>Sections to include</label>
+    <div class="chips" id="parts" style="margin-bottom:14px"></div>
+    <div class="grid">
+      <div>
+        <div class="row"><span>Lines per verse</span><b id="linesV">4</b></div>
+        <input type="range" id="lines" min="2" max="8" value="4">
+      </div>
+      <div>
+        <div class="row"><span>Number of verses</span><b id="versesV">2</b></div>
+        <input type="range" id="verses" min="1" max="4" value="2">
+      </div>
+      <div class="full">
+        <div class="row"><span>Wording: everyday speech ↔ poetic</span><b id="poetV">5</b></div>
+        <input type="range" id="poet" min="1" max="10" value="5">
+      </div>
+      <div class="full">
+        <div class="row"><span>Creativity: simple ↔ experimental</span><b id="creaV">6</b></div>
+        <input type="range" id="crea" min="1" max="10" value="6">
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>More options</h2>
+    <div class="chips" id="extras" style="margin-bottom:14px"></div>
+    <div class="grid">
+      <div><label for="title">Song title (leave empty to auto-generate)</label><input type="text" id="title"></div>
+      <div><label for="hook">Words the hook must include</label><input type="text" id="hook" placeholder="e.g. chaand, safar, dil"></div>
+      <div class="full"><label for="notes">Your special instructions</label><textarea id="notes" placeholder="e.g. start the first line with a question, end with a small twist..."></textarea></div>
+    </div>
+  </section>
+
+  <section class="panel" id="out">
+    <h2 id="outTitle">Your lyrics</h2>
+    <div id="lyrics"></div>
+    <div class="acts">
+      <button class="btn" id="copy">Copy</button>
+      <button class="btn" id="share">Share</button>
+      <button class="btn" id="again">Another version</button>
+      <button class="btn" id="dl">Save as file</button>
+    </div>
+    <div class="err" id="err"></div>
+  </section>
+
+  <section class="panel hist" id="histBox" style="display:none">
+    <h2>Earlier songs (this session)</h2>
+    <div id="hist"></div>
+  </section>
+</main>
+
+<div class="go"><button id="gen">Generate lyrics</button></div>
+
+<script>
+const opt=(id,arr)=>{const s=document.getElementById(id);arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})};
+opt('genre',['Bollywood romantic','Sufi','Ghazal','Qawwali','Bhajan / devotional','Patriotic','Punjabi bhangra','Hip-hop / rap','Pop','Rock','Folk','Folk fusion','EDM / dance','Lullaby','Children\'s rhyme','Cafe / indie','Wedding / sangeet','Holi / festival','Heartbreak / sad','Motivational','Retro 60s-70s','Item song','Comedy / parody','Nazm / shayari']);
+opt('lang',['Pure Hindi','Hindi + Urdu (everyday Bollywood)','Hinglish (Hindi + English)','Urdu','Punjabi','Bhojpuri','Rajasthani','Haryanvi','Marathi','Bengali','Gujarati','English']);
+opt('mood',['Joyful','Romantic','Separation / longing','Hopeful','Energetic','Peaceful','Playful','Nostalgic','Angry / rebellious','Devotional','Cheeky','Lonely']);
+opt('era',['Modern today','90s romantic','70s-80s classic','50s-60s golden age','Timeless / no specific era']);
+opt('tempo',['Slow','Medium','Fast','Very fast / dance']);
+opt('rhyme',['Couplets (AABB)','Alternate (ABAB)','Free verse','Same rhyme on every line']);
+
+function chips(id,items,{multi=false,def=[],cls=''}={}){
+  const box=document.getElementById(id);
+  items.forEach(t=>{
+    const b=document.createElement('button');b.type='button';b.className='chip '+cls;b.textContent=t;
+    b.setAttribute('aria-pressed',def.includes(t)?'true':'false');
+    b.onclick=()=>{
+      if(multi){b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true')}
+      else{box.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true')}
+      if(id==='topicChips'){document.getElementById('topic').value=t}
+    };
+    box.appendChild(b);
+  });
+}
+const getSel=id=>[...document.querySelectorAll('#'+id+' .chip[aria-pressed=true]')].map(c=>c.textContent);
+
+chips('voice',['Male voice','Female voice','Duet (male + female)','Child voice','Group / chorus','Rapper + singer'],{def:['Male voice']});
+chips('parts',['Intro','Mukhda (hook)','Antara (verse)','Chorus','Bridge','Rap verse','Outro'],{multi:true,def:['Mukhda (hook)','Antara (verse)','Bridge'],cls:'on sm'});
+chips('extras',['Urdu shayari touch','A line or two in English','Idioms / proverbs','Aalap / humming','Also write in Roman script','Chord / raga suggestions','Singing notes','Keep it family-friendly','Line-by-line meaning'],{multi:true,cls:'on sm'});
+chips('topicChips',['First love','Rain and chai','Maa','Friendship','Coming home','Heartbreak','Chasing dreams','My country','Wedding night','New morning'],{cls:'sm'});
+
+[['lines','linesV'],['verses','versesV'],['poet','poetV'],['crea','creaV']].forEach(([a,b])=>{
+  const r=document.getElementById(a);r.oninput=()=>document.getElementById(b).textContent=r.value;
+});
+
+let history=[],last=null;
+
+function buildPrompt(){
+  const v=id=>document.getElementById(id).value.trim();
+  const parts=getSel('parts'),extras=getSel('extras'),voice=getSel('voice')[0]||'Male voice';
+  const lang=v('lang');
+  return `You are an experienced songwriter. Write original song lyrics for the brief below.
+
+Topic: ${v('topic')||'any beautiful theme of your choice'}
+Genre: ${v('genre')}
+Lyrics language: ${lang} (write Indian-language lyrics in their native script, e.g. Devanagari for Hindi; write Roman script only for Hinglish if it reads naturally, otherwise Devanagari)
+Mood: ${v('mood')}
+Era / feel: ${v('era')}
+Tempo: ${v('tempo')}
+Rhyme scheme: ${v('rhyme')}
+Singer's voice: ${voice}. The words and emotion must suit this voice. For a duet, prefix lines with [Male] / [Female]. For rapper + singer, keep the parts clearly separate.
+Sections: ${parts.join(', ')||'Mukhda, Antara'}
+Number of verses: ${v('verses')}, about ${v('lines')} lines per verse
+Wording style (1 = everyday speech, 10 = deeply poetic): ${v('poet')}
+Creativity (1-10): ${v('crea')}
+${v('title')?'Title: '+v('title'):'Title: create a good one yourself'}
+${v('hook')?'Use these words / hook: '+v('hook'):''}
+Extra options: ${extras.join(', ')||'none'}
+${v('notes')?'Special instructions: '+v('notes'):''}
+
+Rules:
+- The lyrics must be completely original. Do not reuse lines from any existing song.
+- Label each section in brackets, such as [Mukhda] or [Antara 1].
+- Start with a first line "Title: ..." then a blank line, then the lyrics.
+- Use plain text only, no markdown symbols (** or #).
+- If "Also write in Roman script", "Chord / raga suggestions", "Singing notes" or "Line-by-line meaning" are selected, add each as a separate section at the end.
+${last?'
+The previous version is below. This time use completely different words and a fresh idea:
+'+last.slice(0,600):''}`;
+}
+
+async function generate(again=false){
+  const btn=document.getElementById('gen'),err=document.getElementById('err'),out=document.getElementById('out');
+  err.textContent='';
+  if(!again)last=null;
+  btn.disabled=true;btn.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:buildPrompt()}]})
+    });
+    if(!res.ok)throw new Error('the server did not respond ('+res.status+')');
+    const data=await res.json();
+    const text=(data.content||[]).map(i=>i.type==='text'?i.text:'').join('\n').trim();
+    if(!text)throw new Error('empty response, please try again');
+    show(text);
+  }catch(e){
+    out.style.display='block';
+    err.textContent='Could not generate lyrics: '+e.message+'. Check your internet connection and tap "Generate lyrics" again.';
+  }finally{
+    btn.disabled=false;btn.textContent='Generate lyrics';
+  }
+}
+
+function show(text){
+  last=text;
+  const m=text.match(/^\s*(?:Title|टाइटल)\s*[:：]\s*(.+)$/mi);
+  const title=m?m[1].trim():'Your lyrics';
+  document.getElementById('outTitle').textContent=title;
+  document.getElementById('lyrics').textContent=text;
+  document.getElementById('out').style.display='block';
+  history.unshift({title,text,sub:getSel('voice')[0]+' · '+document.getElementById('genre').value});
+  renderHist();
+  document.getElementById('out').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderHist(){
+  const box=document.getElementById('hist');box.innerHTML='';
+  document.getElementById('histBox').style.display=history.length?'block':'none';
+  history.slice(0,10).forEach(h=>{
+    const b=document.createElement('button');
+    const t=document.createElement('div');t.textContent=h.title;
+    const s=document.createElement('small');s.textContent=h.sub;
+    b.append(t,s);
+    b.onclick=()=>{document.getElementById('outTitle').textContent=h.title;document.getElementById('lyrics').textContent=h.text;last=h.text;document.getElementById('out').scrollIntoView({behavior:'smooth'})};
+    box.appendChild(b);
+  });
+}
+
+document.getElementById('gen').onclick=()=>generate(false);
+document.getElementById('again').onclick=()=>generate(true);
+document.getElementById('copy').onclick=async e=>{
+  try{await navigator.clipboard.writeText(document.getElementById('lyrics').textContent);e.target.textContent='Copied'}
+  catch{const r=document.createRange();r.selectNodeContents(document.getElementById('lyrics'));const s=getSelection();s.removeAllRanges();s.addRange(r);e.target.textContent='Selected, now press copy'}
+  setTimeout(()=>e.target.textContent='Copy',2000);
+};
+document.getElementById('share').onclick=async()=>{
+  const text=document.getElementById('lyrics').textContent;
+  if(navigator.share){try{await navigator.share({title:document.getElementById('outTitle').textContent,text})}catch{}}
+  else document.getElementById('copy').click();
+};
+document.getElementById('dl').onclick=()=>{
+  const blob=new Blob([document.getElementById('lyrics').textContent],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=(document.getElementById('outTitle').textContent||'lyrics')+'.txt';a.click();
+};
+</script>
+</body>
+</html>
